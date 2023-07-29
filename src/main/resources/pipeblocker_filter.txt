@@ -3,7 +3,18 @@
 # Blocklist entries are the same but with a leading -
 # Blank lines and lines starting with # are ignored
 
+# Temporary until we figure out what packages we should whitelist fully
 +com.enderio.*
 +network.rs485.logisticspipes.*
 +net.bdew.lib.*
+
+# JVM primitives and some other stuff
++java.lang.Double
++java.lang.Float
++java.lang.Long
++java.lang.Integer
++java.lang.Boolean
++java.lang.String
+
+# Test
 -info.mmpa.pipeblocker.test.*
