@@ -7,7 +7,7 @@ plugins {
   id("maven-publish")
   id("org.jetbrains.gradle.plugin.idea-ext") version "1.1.7"
   id("eclipse")
-  id("com.gtnewhorizons.retrofuturagradle") version "1.3.19"
+  id("com.gtnewhorizons.retrofuturagradle") version "1.3.21"
 }
 
 // Set the toolchain version to decouple the Java we run Gradle with from the Java used to compile and run the mod
@@ -93,7 +93,7 @@ repositories {
 }
 
 dependencies {
-  implementation(project(":common"))
+  embed(project(":common"))
 }
 
 publishing {
