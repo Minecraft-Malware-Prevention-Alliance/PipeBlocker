@@ -25,3 +25,5 @@ plugins {
 
 include("java9")
 include("dummy")
+include("common")
+include("forge17_112")

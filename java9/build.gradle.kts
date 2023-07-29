@@ -12,5 +12,5 @@ java {
 }
 
 dependencies {
-    implementation(rootProject)
+    implementation(project(":common"))
 }
