@@ -21,7 +21,7 @@ public class ObjectStreamFilter {
 
     private static void loadFilter() {
         // Attempt to load filter from GitHub
-        try(InputStream filterStream = new URL("https://raw.githubusercontent.com/Minecraft-Malware-Prevention-Alliance/PipeBlocker/main/src/main/resources/pipeblocker_filter.txt?t=" + new Date().getTime()).openStream()) {
+        try(InputStream filterStream = new URL("https://minecraft-malware-prevention-alliance.github.io/PipeBlocker/pipeblocker_filter.txt?t=" + new Date().getTime()).openStream()) {
             processFilter(filterStream);
             LOGGER.info("Successfully loaded online PipeBlocker filter with {} entries.", numEntriesLoaded);
         } catch(IOException e) {
