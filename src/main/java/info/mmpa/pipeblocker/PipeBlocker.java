@@ -5,7 +5,7 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(modid = "pipeblocker", name = "PipeBlocker", version = Tags.VERSION)
+@Mod(modid = "pipeblocker", name = "PipeBlocker", version = Tags.VERSION, acceptableRemoteVersions = "*")
 public class PipeBlocker {
 
     public static final Logger LOGGER = LogManager.getLogger("PipeBlocker");
