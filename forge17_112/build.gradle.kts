@@ -17,9 +17,6 @@ java {
     // Azul covers the most platforms for Java 8 toolchains, crucially including MacOS arm64
     vendor.set(org.gradle.jvm.toolchain.JvmVendorSpec.AZUL)
   }
-  // Generate sources and javadocs jars when building and publishing
-  withSourcesJar()
-  withJavadocJar()
 }
 
 // Most RFG configuration lives here, see the JavaDoc for com.gtnewhorizons.retrofuturagradle.MinecraftExtension
@@ -138,4 +135,6 @@ tasks.named<Jar>("jar") {
     }
     dependsOn(project(projectName).tasks.compileJava.get())
   }
+
+  archiveBaseName.set("pipeblocker-forge17_112")
 }

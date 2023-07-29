@@ -42,4 +42,6 @@ tasks.named<Jar>("jar") {
         }
         dependsOn(project(projectName).tasks.compileJava.get())
     }
+
+    archiveBaseName.set("pipeblocker-fabric")
 }
