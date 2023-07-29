@@ -18,16 +18,20 @@ public class ObjectStreamFilter {
 
     private static final Set<Class<?>> REJECTED_CLASSES = Collections.synchronizedSet(new HashSet<>());
 
+    private static int numEntriesLoaded = 0;
+
     private static void loadFilter() {
         // Attempt to load filter from GitHub
-        try(InputStream filterStream = new URL("https://raw.githubusercontent.com/Minecraft-Malware-Prevention-Alliance/PipeBlocker/main/src/main/resources/pipeblocker_filter.txt").openStream()) {
+        try(InputStream filterStream = new URL("https://raw.githubusercontent.com/Minecraft-Malware-Prevention-Alliance/PipeBlocker/main/src/main/resources/pipeblocker_filter.txt?t=" + new Date().getTime()).openStream()) {
             processFilter(filterStream);
+            LOGGER.info("Successfully loaded online PipeBlocker filter with {} entries.", numEntriesLoaded);
         } catch(IOException e) {
             LOGGER.warn("Failed to load online filter, using local version", e);
             try(InputStream localFilterStream = ObjectStreamFilter.class.getResourceAsStream("/pipeblocker_filter.txt")) {
                 if(localFilterStream == null)
                     throw new FileNotFoundException("pipeblocker_filter.txt");
                 processFilter(localFilterStream);
+                LOGGER.info("Successfully loaded local PipeBlocker filter with {} entries.", numEntriesLoaded);
             } catch(IOException e2) {
                 LOGGER.error("Failed to load local filter, this will mean no deserialization is permitted", e2);
             }
@@ -42,7 +46,6 @@ public class ObjectStreamFilter {
                 line = reader.readLine();
             }
         }
-        LOGGER.info("Successfully loaded PipeBlocker filter.");
     }
 
     private static void processLine(String line) {
@@ -59,6 +62,7 @@ public class ObjectStreamFilter {
                 allowedPatterns.add(desiredPattern);
             else
                 rejectedPatterns.add(desiredPattern);
+            numEntriesLoaded++;
         }
     }
 
