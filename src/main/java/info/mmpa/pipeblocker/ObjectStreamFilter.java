@@ -20,7 +20,6 @@ public class ObjectStreamFilter {
         ObjectInputFilter.Config.setSerialFilter(new ObjectInputFilter() {
             @Override
             public Status checkInput(FilterInfo filterInfo) {
-                /*
                 if(filterInfo.serialClass() == null)
                     return Status.UNDECIDED;
 
@@ -34,7 +33,6 @@ public class ObjectStreamFilter {
                 if(REJECTED_CLASSES.add(filterInfo.serialClass())) {
                     LOGGER.warn("Blocked class {} from being deserialized as it's not allowed", filterInfo.serialClass().getName());
                 }
-                 */
                 return Status.REJECTED;
             }
         });

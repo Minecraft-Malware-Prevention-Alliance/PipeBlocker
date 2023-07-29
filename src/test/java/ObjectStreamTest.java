@@ -12,13 +12,17 @@ public class ObjectStreamTest {
         ObjectStreamFilter.apply();
     }
 
+    static class DummyRandomObject implements Serializable {
+        private String thefield = "string";
+    }
+
     @Test
     public void testUnsafeObjectBlocked() {
         byte[] data;
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream os = new ObjectOutputStream(baos);
-            os.writeObject("my test string");
+            os.writeObject(new DummyRandomObject());
             data = baos.toByteArray();
         } catch(IOException e) {
             throw new RuntimeException(e);
@@ -26,7 +30,10 @@ public class ObjectStreamTest {
 
         try {
             ObjectInputStream stream = new ObjectInputStream(new ByteArrayInputStream(data));
-            stream.readObject();
+            if(stream.readObject() instanceof DummyRandomObject)
+                fail("Object should not be deserialized");
+        } catch(InvalidClassException ignored) {
+            /* expected code path */
         } catch(IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
