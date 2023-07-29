@@ -2,7 +2,6 @@ package info.mmpa.pipeblocker;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import sun.misc.ObjectInputFilter;
 
 import java.io.*;
 import java.net.URL;
@@ -56,7 +55,8 @@ public class ObjectStreamFilter {
         if(line.charAt(0) == '+' || line.charAt(0) == '-') {
             boolean isAllowing = line.charAt(0) == '+';
             String glob = line.substring(1);
-            LOGGER.debug("Adding {} rule for glob '{}'", isAllowing ? "allow" : "deny", glob);
+            // explicit select vararg overload for 1.7.10's ancient logger
+            LOGGER.debug("Adding {} rule for glob '{}'", new Object[] {isAllowing ? "allow" : "deny", glob});
             Pattern desiredPattern = Pattern.compile(convertGlobToRegex(glob));
             if(isAllowing)
                 allowedPatterns.add(desiredPattern);
@@ -93,30 +93,45 @@ public class ObjectStreamFilter {
         return false;
     }
 
+    public static CheckStatus check(Class<?> clazz) {
+        if (clazz == null)
+            return CheckStatus.UNDECIDED;
+
+        // If any of the classes are explicitly denied, deny
+        if (inheritanceStream(clazz).map(Class::getCanonicalName).anyMatch(ObjectStreamFilter::isRejectedName)) {
+            if (REJECTED_CLASSES.add(clazz)) {
+                LOGGER.warn("Blocked class {} from being deserialized as it's not allowed", clazz.getName());
+            }
+            return CheckStatus.REJECTED;
+        }
+
+        // If any of the classes are explicitly allowed, allow
+        if (inheritanceStream(clazz).map(Class::getCanonicalName).anyMatch(ObjectStreamFilter::isAllowedName)) {
+            return CheckStatus.UNDECIDED;
+        }
+
+        return CheckStatus.REJECTED;
+    }
+
+
     public static void apply() {
         loadFilter();
-        ObjectInputFilter.Config.setSerialFilter(new ObjectInputFilter() {
-            @Override
-            public Status checkInput(FilterInfo filterInfo) {
-                if(filterInfo.serialClass() == null)
-                    return Status.UNDECIDED;
-
-                // If any of the classes are explicitly denied, deny
-                if(inheritanceStream(filterInfo.serialClass()).map(Class::getCanonicalName).anyMatch(ObjectStreamFilter::isRejectedName)) {
-                    if(REJECTED_CLASSES.add(filterInfo.serialClass())) {
-                        LOGGER.warn("Blocked class {} from being deserialized as it's not allowed", filterInfo.serialClass().getName());
-                    }
-                    return Status.REJECTED;
-                }
-
-                // If any of the classes are explicitly allowed, allow
-                if(inheritanceStream(filterInfo.serialClass()).map(Class::getCanonicalName).anyMatch(ObjectStreamFilter::isAllowedName)) {
-                    return Status.UNDECIDED;
-                }
-
-                return Status.REJECTED;
-            }
-        });
+        String javaVersion = System.getProperties().getProperty("java.specification.version");
+        String className;
+        if ("1.8".equals(javaVersion)) {
+            className = "info.mmpa.pipeblocker.java8.FilterSetter";
+        } else if (javaVersion.chars().allMatch(Character::isDigit) && Integer.parseInt(javaVersion) > 8) {
+            className = "info.mmpa.pipeblocker.java9.FilterSetter";
+        } else {
+            System.err.println("Unsupported java version: " + javaVersion);
+            throw new RuntimeException("Unsupported java version: " + javaVersion);
+        }
+        try {
+            Class.forName(className).getMethod("apply").invoke(null);
+        } catch (ReflectiveOperationException ex) {
+            System.out.println("Unable to invoke setter");
+            throw new RuntimeException(ex);
+        }
     }
 
     /**

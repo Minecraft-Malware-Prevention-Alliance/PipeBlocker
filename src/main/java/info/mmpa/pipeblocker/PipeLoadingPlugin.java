@@ -5,9 +5,11 @@ import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import javax.annotation.Nullable;
 import java.util.Map;
 
+// we support multiple minecraft version, so no @MCVersion
 @IFMLLoadingPlugin.Name("PipeBlocker")
-@IFMLLoadingPlugin.MCVersion("1.12.2")
-public class PipeLoadingPlugin implements IFMLLoadingPlugin {
+// naming clash, so fully qualified name
+@cpw.mods.fml.relauncher.IFMLLoadingPlugin.Name("PipeBlocker")
+public class PipeLoadingPlugin implements IFMLLoadingPlugin, cpw.mods.fml.relauncher.IFMLLoadingPlugin {
 
     public PipeLoadingPlugin() {
         ObjectStreamFilter.apply();
