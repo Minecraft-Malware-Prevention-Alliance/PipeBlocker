@@ -3,5 +3,7 @@
 # Blocklist entries are the same but with a leading -
 # Blank lines and lines starting with # are ignored
 
-
++com.enderio.*
++network.rs485.logisticspipes.*
++net.bdew.lib.*
 -info.mmpa.pipeblocker.test.*
