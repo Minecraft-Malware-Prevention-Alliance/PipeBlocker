@@ -198,4 +198,10 @@ tasks.named<Jar>("jar") {
             "ForceLoadAsMod" to "true"
     )
   }
+  for (projectName in arrayOf(":java9", ":dummy")) {
+    from(project(projectName).tasks.compileJava.get().outputs) {
+      include("**/*.class")
+    }
+    dependsOn(project(projectName).tasks.compileJava.get())
+  }
 }
