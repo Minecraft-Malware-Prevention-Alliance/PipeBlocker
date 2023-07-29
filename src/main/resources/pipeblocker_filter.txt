@@ -1,0 +1,7 @@
+# This is the central filter for PipeBlocker
+# Allowlist entries are specified with a leading + followed by the class name glob
+# Blocklist entries are the same but with a leading -
+# Blank lines and lines starting with # are ignored
+
+
+-info.mmpa.pipeblocker.test.*

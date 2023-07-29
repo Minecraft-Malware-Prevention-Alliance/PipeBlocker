@@ -1,3 +1,5 @@
+package info.mmpa.pipeblocker.test;
+
 import info.mmpa.pipeblocker.ObjectStreamFilter;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
