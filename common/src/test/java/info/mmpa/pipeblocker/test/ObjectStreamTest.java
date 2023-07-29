@@ -5,6 +5,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,13 +20,12 @@ public class ObjectStreamTest {
         private String thefield = "string";
     }
 
-    @Test
-    public void testUnsafeObjectBlocked() {
+    private static void serializeDeserialize(Object o) {
         byte[] data;
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream os = new ObjectOutputStream(baos);
-            os.writeObject(new DummyRandomObject());
+            os.writeObject(o);
             data = baos.toByteArray();
         } catch(IOException e) {
             throw new RuntimeException(e);
@@ -39,5 +40,17 @@ public class ObjectStreamTest {
         } catch(IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Test
+    public void testUnsafeObjectBlocked() {
+        serializeDeserialize(new DummyRandomObject());
+    }
+
+    @Test
+    public void testUnsafeObjectInMapBlocked() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("test", new DummyRandomObject());
+        serializeDeserialize(map);
     }
 }
