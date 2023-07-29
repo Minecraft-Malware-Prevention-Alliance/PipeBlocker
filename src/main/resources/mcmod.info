@@ -1,0 +1,13 @@
+[
+  {
+    "modid": "pipeblocker",
+    "name": "PipeBlocker",
+    "version": "${modVersion}",
+    "mcversion": "1.12.2",
+    "description": "An example mod",
+    "url": "https://github.com/GTNewHorizons/RetroFuturaGradle/",
+    "credits": "",
+    "authorList": ["placeholder"],
+    "dependencies": []
+  }
+]
