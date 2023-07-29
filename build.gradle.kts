@@ -184,3 +184,13 @@ idea {
 tasks.processIdeaSettings.configure {
   dependsOn(tasks.injectTags)
 }
+
+tasks.named<Jar>("jar") {
+  manifest {
+    attributes(
+            "FMLCorePlugin" to ("info.mmpa.pipeblocker.PipeLoadingPlugin"),
+            "FMLCorePluginContainsFMLMod" to "true",
+            "ForceLoadAsMod" to "true"
+    )
+  }
+}
