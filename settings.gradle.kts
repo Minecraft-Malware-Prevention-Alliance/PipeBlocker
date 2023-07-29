@@ -1,4 +1,4 @@
-rootProject.name = "RFGExampleMod"
+rootProject.name = "PipeBlocker"
 
 pluginManagement {
   repositories {
