@@ -12,7 +12,7 @@ plugins {
 
 // Project properties
 group = "info.mmpa.pipeblocker"
-version = "1.0.0"
+version = "1.1.0"
 
 // Set the toolchain version to decouple the Java we run Gradle with from the Java used to compile and run the mod
 java {
