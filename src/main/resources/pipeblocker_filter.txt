@@ -16,7 +16,7 @@
 +java.lang.Boolean
 +java.lang.String
 +java.util.HashMap
-+java.util.Map$Entry
++java.util.Map.Entry
 +java.lang.Number
 
 # Test
