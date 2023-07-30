@@ -112,7 +112,11 @@ public class ObjectStreamFilter {
         if (REJECTED_CLASSES.add(underlyingClass)) {
             LOGGER.warn("Blocked class {} from being deserialized as it's not allowed", underlyingClass.getName());
         }
-        return CheckStatus.REJECTED;
+        if (Objects.equals(System.getProperty("info.mmpa.pipeblocker.log-only"), "true")) {
+            return CheckStatus.UNDECIDED;
+        } else {
+            return CheckStatus.REJECTED;
+        }
     }
 
 
