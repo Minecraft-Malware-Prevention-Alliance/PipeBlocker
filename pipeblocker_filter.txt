@@ -10,19 +10,28 @@
 +network.rs485.logisticspipes.*
 +net.bdew.lib.*
 
-# JVM primitives and some other stuff
+# JVM primitives and some other utils
 +java.lang.Double
 +java.lang.Float
 +java.lang.Long
 +java.lang.Integer
 +java.lang.Boolean
 +java.lang.String
++java.lang.Number
++java.util.UUID
+
+# Maps, sets and arrays
 +java.util.HashMap
 +java.util.Map.Entry
-+java.lang.Number
-
-# Make danknull work
++java.util.HashSet
+# danknull needs this
 +java.util.WeakHashMap
+
+# Fastutil maps themselves are safe
++it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
++it.unimi.dsi.fastutil.objects.AbstractObject2ObjectMap
+# Unlike what the name says, this doesn't execute arbitrary code
++it.unimi.dsi.fastutil.objects.AbstractObject2ObjectFunction
 
 # Test
 -info.mmpa.pipeblocker.test.*
