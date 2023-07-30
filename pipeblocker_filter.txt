@@ -16,6 +16,7 @@
 +java.lang.Boolean
 +java.lang.String
 +java.util.HashMap
++java.util.Map$Entry
 
 # Test
 -info.mmpa.pipeblocker.test.*
