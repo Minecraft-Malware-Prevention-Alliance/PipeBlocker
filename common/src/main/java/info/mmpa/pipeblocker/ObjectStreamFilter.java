@@ -97,15 +97,20 @@ public class ObjectStreamFilter {
         if (clazz == null)
             return CheckStatus.UNDECIDED;
 
+        Class<?> underlyingClass = clazz;
+        while (underlyingClass.isArray()) {
+            underlyingClass = underlyingClass.getComponentType();
+        }
+
         // Validate that none of the classes are explicitly denied
-        if (inheritanceStream(clazz).map(Class::getCanonicalName).noneMatch(ObjectStreamFilter::isRejectedName)) {
+        if (inheritanceStream(underlyingClass).map(Class::getCanonicalName).noneMatch(ObjectStreamFilter::isRejectedName)) {
             // If any of the classes are explicitly allowed, allow
-            if (inheritanceStream(clazz).map(Class::getCanonicalName).anyMatch(ObjectStreamFilter::isAllowedName)) {
+            if (inheritanceStream(underlyingClass).map(Class::getCanonicalName).anyMatch(ObjectStreamFilter::isAllowedName)) {
                 return CheckStatus.UNDECIDED;
             }
         }
 
-        if (REJECTED_CLASSES.add(clazz)) {
+        if (REJECTED_CLASSES.add(underlyingClass)) {
             LOGGER.warn("Blocked class {} from being deserialized as it's not allowed", clazz.getName());
         }
         return CheckStatus.REJECTED;
