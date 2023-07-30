@@ -17,6 +17,7 @@
 +java.lang.String
 +java.util.HashMap
 +java.util.Map$Entry
++java.lang.Number
 
 # Test
 -info.mmpa.pipeblocker.test.*

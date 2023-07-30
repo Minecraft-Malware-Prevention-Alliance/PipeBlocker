@@ -109,9 +109,8 @@ public class ObjectStreamFilter {
                 return CheckStatus.UNDECIDED;
             }
         }
-
         if (REJECTED_CLASSES.add(underlyingClass)) {
-            LOGGER.warn("Blocked class {} from being deserialized as it's not allowed", clazz.getName());
+            LOGGER.warn("Blocked class {} from being deserialized as it's not allowed", underlyingClass.getName());
         }
         return CheckStatus.REJECTED;
     }
@@ -150,7 +149,8 @@ public class ObjectStreamFilter {
      * @return A regex pattern to recognize the given glob pattern.
      */
     public static String convertGlobToRegex(String pattern) {
-        StringBuilder sb = new StringBuilder(pattern.length());
+        StringBuilder sb = new StringBuilder(pattern.length() + 2);
+        sb.append('^');
         int inGroup = 0;
         int inClass = 0;
         int firstIndexInClass = -1;
@@ -235,6 +235,7 @@ public class ObjectStreamFilter {
                     sb.append(ch);
             }
         }
+        sb.append('$');
         return sb.toString();
     }
 }
