@@ -47,3 +47,5 @@
 
 # Test
 +info.mmpa.pipeblocker.test.ObjectStreamTest.TestEnum
+
+-java.lang.invoke.SerializedLambda
