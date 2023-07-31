@@ -21,9 +21,11 @@
 +java.util.UUID
 
 # Maps, sets and arrays
+# These by themselves should be safe
 +java.util.HashMap
 +java.util.Map.Entry
 +java.util.HashSet
++java.util.TreeMap
 # danknull needs this
 +java.util.WeakHashMap
 
