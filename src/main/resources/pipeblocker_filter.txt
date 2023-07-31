@@ -41,5 +41,9 @@
 # Unlike what the name says, this doesn't execute arbitrary code
 +it.unimi.dsi.fastutil.objects.AbstractObject2ObjectFunction
 
+# SimpleAchievements
++org.wyldmods.simpleachievements.common.data.Element.Alignment
++org.wyldmods.simpleachievements.common.data.Element
+
 # Test
 +info.mmpa.pipeblocker.test.ObjectStreamTest.TestEnum
