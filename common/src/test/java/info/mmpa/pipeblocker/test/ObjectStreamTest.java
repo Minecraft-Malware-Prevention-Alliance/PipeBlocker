@@ -20,6 +20,10 @@ public class ObjectStreamTest {
         private String thefield = "string";
     }
 
+    enum TestEnum {
+        TEST_ENUM
+    }
+
     private static void serializeDeserialize(Object o, boolean shouldFail) {
         byte[] data;
         try {
@@ -64,5 +68,10 @@ public class ObjectStreamTest {
         Map<String, String> map = new HashMap<>();
         map.put("test", "safe value");
         serializeDeserialize(map, false);
+    }
+
+    @Test
+    public void testEnumAllowed() {
+        serializeDeserialize(TestEnum.TEST_ENUM, false);
     }
 }

@@ -1,6 +1,9 @@
 # This is the central filter for PipeBlocker
-# Allowlist entries are specified with a leading + followed by the class name glob
-# Blocklist entries are the same but with a leading -
+
+# List entries start with a character indicating the type, and are followed by the class name glob
+# Lines starting with + allow deserialization if anything in the inheritance chain matches
+# Lines starting with - deny deserialization if anything in the inheritance chain matches
+# Lines starting with ~ allow deserialization only classes that match
 # Blank lines and lines starting with # are ignored
 # You **must** also account for fields and if maps/lists are being used the items
 # they contain.
@@ -19,6 +22,7 @@
 +java.lang.String
 +java.lang.Number
 +java.util.UUID
+~java.lang.Enum
 
 # Maps, sets and arrays
 # These by themselves should be safe
@@ -26,6 +30,8 @@
 +java.util.Map.Entry
 +java.util.HashSet
 +java.util.TreeMap
++java.util.Arrays.ArrayList
+
 # danknull needs this
 +java.util.WeakHashMap
 
@@ -36,4 +42,4 @@
 +it.unimi.dsi.fastutil.objects.AbstractObject2ObjectFunction
 
 # Test
--info.mmpa.pipeblocker.test.*
++info.mmpa.pipeblocker.test.ObjectStreamTest.TestEnum

@@ -14,6 +14,7 @@ public class ObjectStreamFilter {
 
     private static final List<Pattern> allowedPatterns = new ArrayList<>();
     private static final List<Pattern> rejectedPatterns = new ArrayList<>();
+    private static final List<Pattern> softAllowedPatterns = new ArrayList<>();
 
     private static final Set<Class<?>> REJECTED_CLASSES = Collections.synchronizedSet(new HashSet<>());
 
@@ -52,17 +53,30 @@ public class ObjectStreamFilter {
         if(line.length() == 0 || line.charAt(0) == '#')
             return;
         // process glob lines
-        if(line.charAt(0) == '+' || line.charAt(0) == '-') {
-            boolean isAllowing = line.charAt(0) == '+';
+        String type = null;
+        List<Pattern> list = null;
+        switch (line.charAt(0)) {
+            case '+': {
+                type = "allow";
+                list = allowedPatterns;
+                break;
+            }
+            case '-': {
+                type = "deny";
+                list = rejectedPatterns;
+                break;
+            }
+            case '~': {
+                type = "soft allow";
+                list = softAllowedPatterns;
+                break;
+            }
+        }
+        if (list != null) {
             String glob = line.substring(1);
-            // explicit select vararg overload for 1.7.10's ancient logger
-            LOGGER.debug("Adding {} rule for glob '{}'", new Object[] {isAllowing ? "allow" : "deny", glob});
+            LOGGER.debug("Adding {} rule for glob '{}'", new Object[] {type, glob});
             Pattern desiredPattern = Pattern.compile(convertGlobToRegex(glob));
-            if(isAllowing)
-                allowedPatterns.add(desiredPattern);
-            else
-                rejectedPatterns.add(desiredPattern);
-            numEntriesLoaded++;
+            list.add(desiredPattern);
         }
     }
 
@@ -93,6 +107,14 @@ public class ObjectStreamFilter {
         return false;
     }
 
+    private static boolean isSoftAllowedName(String name) {
+        for(Pattern p : softAllowedPatterns) {
+            if(p.matcher(name).matches())
+                return true;
+        }
+        return false;
+    }
+
     public static CheckStatus check(Class<?> clazz) {
         if (clazz == null)
             return CheckStatus.UNDECIDED;
@@ -105,7 +127,8 @@ public class ObjectStreamFilter {
         // Validate that none of the classes are explicitly denied
         if (inheritanceStream(underlyingClass).map(Class::getCanonicalName).noneMatch(ObjectStreamFilter::isRejectedName)) {
             // If any of the classes are explicitly allowed, allow
-            if (inheritanceStream(underlyingClass).map(Class::getCanonicalName).anyMatch(ObjectStreamFilter::isAllowedName)) {
+            if (inheritanceStream(underlyingClass).map(Class::getCanonicalName).anyMatch(ObjectStreamFilter::isAllowedName)
+                || isSoftAllowedName(underlyingClass.getCanonicalName())) {
                 return CheckStatus.UNDECIDED;
             }
         }
