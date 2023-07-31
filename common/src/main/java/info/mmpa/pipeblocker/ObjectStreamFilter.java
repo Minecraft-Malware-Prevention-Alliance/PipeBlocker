@@ -77,6 +77,7 @@ public class ObjectStreamFilter {
             LOGGER.debug("Adding {} rule for glob '{}'", new Object[] {type, glob});
             Pattern desiredPattern = Pattern.compile(convertGlobToRegex(glob));
             list.add(desiredPattern);
+            numEntriesLoaded++;
         }
     }
 
