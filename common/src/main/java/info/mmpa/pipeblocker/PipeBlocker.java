@@ -114,11 +114,11 @@ public class PipeBlocker {
     }
 
     private static FilterMatchType matchClass(Class<?> clazz) {
-        if (inheritanceStream(clazz).map(Class::getCanonicalName).noneMatch(n -> PipeBlocker.isMatchingName(n, rejectedPatterns)))
+        if (inheritanceStream(clazz).map(Class::getCanonicalName).anyMatch(n -> PipeBlocker.isMatchingName(n, rejectedPatterns)))
             return FilterMatchType.REJECT;
-        if (inheritanceStream(clazz).map(Class::getCanonicalName).noneMatch(n -> PipeBlocker.isMatchingName(n, allowedPatterns)))
+        if (inheritanceStream(clazz).map(Class::getCanonicalName).anyMatch(n -> PipeBlocker.isMatchingName(n, allowedPatterns)))
             return FilterMatchType.ALLOW;
-        if (inheritanceStream(clazz).map(Class::getCanonicalName).noneMatch(n -> PipeBlocker.isMatchingName(n, softAllowedPatterns)))
+        if (inheritanceStream(clazz).map(Class::getCanonicalName).anyMatch(n -> PipeBlocker.isMatchingName(n, softAllowedPatterns)))
             return FilterMatchType.SOFT_ALLOW;
         return FilterMatchType.DEFAULT;
     }
