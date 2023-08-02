@@ -15,6 +15,5 @@ public class PipeBlockerMod {
     @Mod.EventHandler
     @SuppressWarnings("unused")
     public void init(FMLInitializationEvent ev) {
-        LOGGER.info("Pipes being blocked.");
     }
 }
