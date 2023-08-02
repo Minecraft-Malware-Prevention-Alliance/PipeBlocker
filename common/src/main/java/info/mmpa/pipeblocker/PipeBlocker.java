@@ -9,7 +9,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-public class ObjectStreamFilter {
+public class PipeBlocker {
     private static final Logger LOGGER = LogManager.getLogger("PipeBlocker");
 
     private static final List<Pattern> allowedPatterns = new ArrayList<>();
@@ -20,14 +20,26 @@ public class ObjectStreamFilter {
 
     private static int numEntriesLoaded = 0;
 
+    private static String filterURL = "https://minecraft-malware-prevention-alliance.github.io/PipeBlocker/pipeblocker_filter.txt?t=" + new Date().getTime();
+    private static boolean logOnly = Objects.equals(System.getProperty("info.mmpa.pipeblocker.log-only"), "true");
+    private static FilterHook filterHook = null;
+    private static boolean initialized = false;
+
+    private static void clearFilter() {
+        numEntriesLoaded = 0;
+        allowedPatterns.clear();
+        rejectedPatterns.clear();
+        softAllowedPatterns.clear();
+    }
+
     private static void loadFilter() {
         // Attempt to load filter from GitHub
-        try(InputStream filterStream = new URL("https://minecraft-malware-prevention-alliance.github.io/PipeBlocker/pipeblocker_filter.txt?t=" + new Date().getTime()).openStream()) {
+        try(InputStream filterStream = new URL(filterURL).openStream()) {
             processFilter(filterStream);
             LOGGER.info("Successfully loaded online PipeBlocker filter with {} entries.", numEntriesLoaded);
         } catch(IOException e) {
             LOGGER.warn("Failed to load online filter, using local version", e);
-            try(InputStream localFilterStream = ObjectStreamFilter.class.getResourceAsStream("/pipeblocker_filter.txt")) {
+            try(InputStream localFilterStream = PipeBlocker.class.getResourceAsStream("/pipeblocker_filter.txt")) {
                 if(localFilterStream == null)
                     throw new FileNotFoundException("pipeblocker_filter.txt");
                 processFilter(localFilterStream);
@@ -40,6 +52,7 @@ public class ObjectStreamFilter {
 
     private static void processFilter(InputStream filterStream) throws IOException {
         try(BufferedReader reader = new BufferedReader(new InputStreamReader(filterStream))) {
+            clearFilter();
             String line = reader.readLine();
             while(line != null) {
                 processLine(line.trim());
@@ -92,28 +105,22 @@ public class ObjectStreamFilter {
         return streamBuilder.build();
     }
 
-    private static boolean isRejectedName(String name) {
-        for(Pattern p : rejectedPatterns) {
+    private static boolean isMatchingName(String name, List<Pattern> patterns) {
+        for(Pattern p : patterns) {
             if(p.matcher(name).matches())
                 return true;
         }
         return false;
     }
 
-    private static boolean isAllowedName(String name) {
-        for(Pattern p : allowedPatterns) {
-            if(p.matcher(name).matches())
-                return true;
-        }
-        return false;
-    }
-
-    private static boolean isSoftAllowedName(String name) {
-        for(Pattern p : softAllowedPatterns) {
-            if(p.matcher(name).matches())
-                return true;
-        }
-        return false;
+    private static FilterMatchType matchClass(Class<?> clazz) {
+        if (inheritanceStream(clazz).map(Class::getCanonicalName).noneMatch(n -> PipeBlocker.isMatchingName(n, rejectedPatterns)))
+            return FilterMatchType.REJECT;
+        if (inheritanceStream(clazz).map(Class::getCanonicalName).noneMatch(n -> PipeBlocker.isMatchingName(n, allowedPatterns)))
+            return FilterMatchType.ALLOW;
+        if (inheritanceStream(clazz).map(Class::getCanonicalName).noneMatch(n -> PipeBlocker.isMatchingName(n, softAllowedPatterns)))
+            return FilterMatchType.SOFT_ALLOW;
+        return FilterMatchType.DEFAULT;
     }
 
     public static CheckStatus check(Class<?> clazz) {
@@ -125,26 +132,49 @@ public class ObjectStreamFilter {
             underlyingClass = underlyingClass.getComponentType();
         }
 
-        // Validate that none of the classes are explicitly denied
-        if (inheritanceStream(underlyingClass).map(Class::getCanonicalName).noneMatch(ObjectStreamFilter::isRejectedName)) {
-            // If any of the classes are explicitly allowed, allow
-            if (inheritanceStream(underlyingClass).map(Class::getCanonicalName).anyMatch(ObjectStreamFilter::isAllowedName)
-                || isSoftAllowedName(underlyingClass.getCanonicalName())) {
-                return CheckStatus.UNDECIDED;
+        FilterMatchType matchType = matchClass(underlyingClass);
+
+        if (matchType == FilterMatchType.SOFT_ALLOW || matchType == FilterMatchType.ALLOW) {
+            CheckStatus status = CheckStatus.UNDECIDED;
+            if (filterHook != null) {
+                status = filterHook.check(underlyingClass, matchType, status);
             }
+            return status;
         }
-        if (REJECTED_CLASSES.add(underlyingClass)) {
+
+        CheckStatus status = logOnly?CheckStatus.UNDECIDED:CheckStatus.REJECTED;
+        if (filterHook != null) {
+            status = filterHook.check(underlyingClass, matchType, status);
+        }
+
+        if (filterHook != null && REJECTED_CLASSES.add(underlyingClass)) {
             LOGGER.warn("Blocked class {} from being deserialized as it's not allowed", underlyingClass.getName());
         }
-        if (Objects.equals(System.getProperty("info.mmpa.pipeblocker.log-only"), "true")) {
-            return CheckStatus.UNDECIDED;
-        } else {
-            return CheckStatus.REJECTED;
-        }
+
+        return status;
     }
 
 
     public static void apply() {
+        if (initialized) {
+            throw new RuntimeException("PipeBlocker is already initialized!");
+        }
+        initialized = true;
+        if (Objects.equals(System.getProperty("info.mmpa.pipeblocker.log-only"), "true")) {
+            LOGGER.fatal("**************************************************************");
+            LOGGER.fatal("*  WARNING: You are running PipeBlocker with log only mode.  *");
+            LOGGER.fatal("*                                                            *");
+            LOGGER.fatal("* This means the protections of PipeBlocker are disabled and *");
+            LOGGER.fatal("* would be blocked deserialization attempts are only logged. *");
+            LOGGER.fatal("* While this useful for figuring out what is broken, you     *");
+            LOGGER.fatal("* SHOULD NOT use this mode while playing on multiplayer      *");
+            LOGGER.fatal("* servers.                                                   *");
+            LOGGER.fatal("*                                                            *");
+            LOGGER.fatal("* You should disable this unless you are trying to figure    *");
+            LOGGER.fatal("* out what mod is causing issues using the instructions on   *");
+            LOGGER.fatal("* GitHub, or you were asked to on our issue tracker.         *");
+            LOGGER.fatal("**************************************************************");
+        }
         loadFilter();
         String javaVersion = System.getProperties().getProperty("java.specification.version");
         String className;
@@ -162,6 +192,57 @@ public class ObjectStreamFilter {
             System.out.println("Unable to invoke setter");
             throw new RuntimeException(ex);
         }
+    }
+
+    /**
+     * Set the URL to load PipeBlocker filters from.
+     * Must be executed before initialization.
+     * @param url The URL to load the filter from.
+     *            You are responsible for adding a cachebuster.
+     * @throws RuntimeException Method is executed after initialization
+     * */
+
+    public static void setFilterURL(String url) {
+        if (initialized) {
+            throw new RuntimeException("Filter URL must be set before initialization");
+        }
+        filterURL = url;
+    }
+
+    /**
+     * Sets the filter hook for PipeBlocker. This will be passed the class
+     * attempted to be deserialized, the match type in the list and what
+     * the decided action is, and the hook can decide to change the action
+     * taken.
+     * <p></p>
+     * The hook can also be used to log all successful and unsuccessful
+     * deserialization attempts.
+     * <p></p>
+     * Logging will also be disabled for failed deserialization.
+     *
+     * @param hook The filter hook to use.
+     * @throws RuntimeException Method is executed after initialization
+     * */
+
+    public static void setFilterHook(FilterHook hook) {
+        if (initialized) {
+            throw new RuntimeException("Filter hook must be set before initialization");
+        }
+        filterHook = hook;
+    }
+
+    /**
+     * Sets whether to only log blocked attempts, instead of actually blocking them.
+     *
+     * @param logOnly Whether to only log instead of blocking attempts.
+     * @throws RuntimeException Method is executed after initialization
+     * */
+
+    public static void setLogOnly(boolean logOnly) {
+        if (initialized) {
+            throw new RuntimeException("Log-only status must be set before initialization");
+        }
+        PipeBlocker.logOnly = logOnly;
     }
 
     /**

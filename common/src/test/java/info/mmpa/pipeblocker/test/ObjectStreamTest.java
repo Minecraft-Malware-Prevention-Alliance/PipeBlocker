@@ -1,6 +1,6 @@
 package info.mmpa.pipeblocker.test;
 
-import info.mmpa.pipeblocker.ObjectStreamFilter;
+import info.mmpa.pipeblocker.PipeBlocker;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ObjectStreamTest {
     @BeforeAll
     public static void applyFilter() {
-        ObjectStreamFilter.apply();
+        PipeBlocker.apply();
     }
 
     static class DummyRandomObject implements Serializable {
