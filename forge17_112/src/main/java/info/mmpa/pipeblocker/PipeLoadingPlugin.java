@@ -13,6 +13,7 @@ public class PipeLoadingPlugin implements IFMLLoadingPlugin, cpw.mods.fml.relaun
 
     public PipeLoadingPlugin() {
         PipeBlocker.apply();
+        PipeBlockerMod.LOGGER.info("Pipes being blocked.");
     }
 
     @Override
