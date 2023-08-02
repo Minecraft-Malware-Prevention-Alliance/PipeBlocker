@@ -12,7 +12,7 @@ import java.util.Map;
 public class PipeLoadingPlugin implements IFMLLoadingPlugin, cpw.mods.fml.relauncher.IFMLLoadingPlugin {
 
     public PipeLoadingPlugin() {
-        ObjectStreamFilter.apply();
+        PipeBlocker.apply();
     }
 
     @Override
