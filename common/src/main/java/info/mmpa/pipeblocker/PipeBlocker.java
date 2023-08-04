@@ -15,6 +15,7 @@ public class PipeBlocker {
     private static final List<Pattern> allowedPatterns = new ArrayList<>();
     private static final List<Pattern> rejectedPatterns = new ArrayList<>();
     private static final List<Pattern> softAllowedPatterns = new ArrayList<>();
+    private static final HashMap<Class<?>, CheckStatus> cache = new HashMap<>();
 
     private static final Set<Class<?>> REJECTED_CLASSES = Collections.synchronizedSet(new HashSet<>());
 
@@ -30,6 +31,7 @@ public class PipeBlocker {
         allowedPatterns.clear();
         rejectedPatterns.clear();
         softAllowedPatterns.clear();
+        cache.clear();
     }
 
     private static void loadFilter() {
@@ -127,6 +129,8 @@ public class PipeBlocker {
         if (clazz == null)
             return CheckStatus.UNDECIDED;
 
+        if (cache.containsKey(clazz)) return cache.get(clazz);
+
         Class<?> underlyingClass = clazz;
         while (underlyingClass.isArray()) {
             underlyingClass = underlyingClass.getComponentType();
@@ -139,6 +143,7 @@ public class PipeBlocker {
             if (filterHook != null) {
                 status = filterHook.check(underlyingClass, matchType, status);
             }
+            cache.put(clazz, status);
             return status;
         }
 
@@ -150,6 +155,8 @@ public class PipeBlocker {
         if (filterHook != null && REJECTED_CLASSES.add(underlyingClass)) {
             LOGGER.warn("Blocked class {} from being deserialized as it's not allowed", underlyingClass.getName());
         }
+
+        cache.put(clazz, status);
 
         return status;
     }

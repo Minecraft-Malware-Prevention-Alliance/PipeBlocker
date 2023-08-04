@@ -7,7 +7,7 @@ allprojects {
   apply(plugin = "java-library")
   // Project properties
   group = "info.mmpa.pipeblocker"
-  version = "1.1.4-beta"
+  version = "1.2.0-beta"
 
   val embed: Configuration by configurations.creating {
     description = "Included in output JAR"
