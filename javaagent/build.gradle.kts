@@ -1,4 +1,7 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
+    id("com.github.johnrengelman.shadow") version "8.1.1"
     id("java")
 }
 
@@ -15,8 +18,8 @@ repositories {
 }
 
 dependencies {
-    embed(implementation("org.apache.logging.log4j:log4j-core:2.0-beta9")!!)
-    embed(implementation("org.apache.logging.log4j:log4j-api:2.0-beta9")!!)
+    implementation("org.apache.logging.log4j:log4j-core:2.0-beta9")!!
+    implementation("org.apache.logging.log4j:log4j-api:2.0-beta9")!!
 
     embed(project(":common"))
 }
@@ -41,4 +44,12 @@ tasks.named<Jar>("jar") {
     }
 
     archiveBaseName.set("pipeblocker-javaagent")
+
+    dependsOn(tasks.shadowJar)
+}
+
+tasks.named<ShadowJar>("shadowJar") {
+    exclude("META-INF/LICENSE")
+    isEnableRelocation = true
+    relocationPrefix = "info.mmpa.pipeblocker.shadow"
 }
