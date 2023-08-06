@@ -35,6 +35,7 @@ public class PipeBlockerAgent {
 
     public static void premain(String args, Instrumentation instrumentation){
         PipeBlocker.setLogOnly(false);
+        PipeBlocker.setAllowUnsafe(true);
         PipeBlocker.setFilterHook((underlyingClass, matchType, status) -> {
             String className = underlyingClass.getCanonicalName();
             if (!classesReported.contains(className)) {
