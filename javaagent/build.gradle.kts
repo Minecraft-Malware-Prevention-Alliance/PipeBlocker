@@ -49,7 +49,12 @@ tasks.named<Jar>("jar") {
 }
 
 tasks.named<ShadowJar>("shadowJar") {
+    for (projectName in arrayOf(":java9")) {
+        from(project(projectName).tasks.compileJava.get().outputs) {
+            include("**/*.class")
+        }
+        dependsOn(project(projectName).tasks.compileJava.get())
+    }
+
     exclude("META-INF/LICENSE")
-    isEnableRelocation = true
-    relocationPrefix = "info.mmpa.pipeblocker.shadow"
 }
