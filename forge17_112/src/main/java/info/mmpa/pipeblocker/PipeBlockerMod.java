@@ -15,5 +15,6 @@ public class PipeBlockerMod {
     @Mod.EventHandler
     @SuppressWarnings("unused")
     public void init(FMLInitializationEvent ev) {
+        PipeBlocker.useLog4j();
     }
 }
