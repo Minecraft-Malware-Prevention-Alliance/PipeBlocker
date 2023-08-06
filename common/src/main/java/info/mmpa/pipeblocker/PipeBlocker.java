@@ -25,6 +25,7 @@ public class PipeBlocker {
     private static boolean logOnly = Objects.equals(System.getProperty("info.mmpa.pipeblocker.log-only"), "true");
     private static FilterHook filterHook = null;
     private static boolean initialized = false;
+    private static boolean allowUnsafe = false;
 
     private static void clearFilter() {
         numEntriesLoaded = 0;
@@ -49,6 +50,13 @@ public class PipeBlocker {
             } catch(IOException e2) {
                 LOGGER.error("Failed to load local filter, this will mean no deserialization is permitted", e2);
             }
+        }
+        if (!allowUnsafe && (
+                isMatchingName("info.mmpa.pipeblocker.test.UnsafeObject", allowedPatterns) ||
+                isMatchingName("info.mmpa.pipeblocker.test.UnsafeObject", softAllowedPatterns) ||
+                !isMatchingName("info.mmpa.pipeblocker.test.UnsafeObject", rejectedPatterns)
+        )) {
+            throw new RuntimeException("Broken PipeBlocker list detected -- please file an issue!");
         }
     }
 
@@ -109,8 +117,10 @@ public class PipeBlocker {
 
     private static boolean isMatchingName(String name, List<Pattern> patterns) {
         for(Pattern p : patterns) {
-            if(p.matcher(name).matches())
+            if(p.matcher(name).matches()) {
+                System.out.println(p + " " + name);
                 return true;
+            }
         }
         return false;
     }
@@ -120,7 +130,7 @@ public class PipeBlocker {
             return FilterMatchType.REJECT;
         if (inheritanceStream(clazz).map(Class::getCanonicalName).anyMatch(n -> PipeBlocker.isMatchingName(n, allowedPatterns)))
             return FilterMatchType.ALLOW;
-        if (inheritanceStream(clazz).map(Class::getCanonicalName).anyMatch(n -> PipeBlocker.isMatchingName(n, softAllowedPatterns)))
+        if (PipeBlocker.isMatchingName(clazz.getCanonicalName(), softAllowedPatterns))
             return FilterMatchType.SOFT_ALLOW;
         return FilterMatchType.DEFAULT;
     }
@@ -250,6 +260,20 @@ public class PipeBlocker {
             throw new RuntimeException("Log-only status must be set before initialization");
         }
         PipeBlocker.logOnly = logOnly;
+    }
+
+    /**
+     * Sets whether to allow unsafe lists.
+     *
+     * @param allowUnsafe Whether to allow unsafe lists.
+     * @throws RuntimeException Method is executed after initialization
+     * */
+
+    public static void setAllowUnsafe(boolean allowUnsafe) {
+        if (initialized) {
+            throw new RuntimeException("Log-only status must be set before initialization");
+        }
+        PipeBlocker.allowUnsafe = allowUnsafe;
     }
 
     /**

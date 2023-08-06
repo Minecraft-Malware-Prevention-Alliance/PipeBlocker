@@ -47,6 +47,7 @@
 
 # Test
 +info.mmpa.pipeblocker.test.ObjectStreamTest.TestEnum
+-info.mmpa.pipeblocker.test.UnsafeObject
 
+# Unsafe
 -java.lang.invoke.SerializedLambda
-
