@@ -1,1 +1,52 @@
-+*
+# This is the central filter for PipeBlocker
+
+# List entries start with a character indicating the type, and are followed by the class name glob
+# Lines starting with + allow deserialization if anything in the inheritance chain matches
+# Lines starting with - deny deserialization if anything in the inheritance chain matches
+# Lines starting with ~ allow deserialization only classes that match
+# Blank lines and lines starting with # are ignored
+# You **must** also account for fields and if maps/lists are being used the items
+# they contain.
+
+# Temporary until we figure out what packages we should whitelist fully
++com.enderio.*
++network.rs485.logisticspipes.*
++net.bdew.lib.*
+
+# JVM primitives and some other utils
++java.lang.Double
++java.lang.Float
++java.lang.Long
++java.lang.Integer
++java.lang.Boolean
++java.lang.String
++java.lang.Number
++java.util.UUID
+~java.lang.Enum
+
+# Maps, sets and arrays
+# These by themselves should be safe
++java.util.HashMap
++java.util.Map.Entry
++java.util.HashSet
++java.util.TreeMap
++java.util.Arrays.ArrayList
+
+# danknull needs this
++java.util.WeakHashMap
+
+# Fastutil maps themselves are safe
++it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
++it.unimi.dsi.fastutil.objects.AbstractObject2ObjectMap
+# Unlike what the name says, this doesn't execute arbitrary code
++it.unimi.dsi.fastutil.objects.AbstractObject2ObjectFunction
+
+# SimpleAchievements
++org.wyldmods.simpleachievements.common.data.Element.Alignment
++org.wyldmods.simpleachievements.common.data.Element
+
+# Test
++info.mmpa.pipeblocker.test.ObjectStreamTest.TestEnum
+
+-java.lang.invoke.SerializedLambda
+
