@@ -123,7 +123,6 @@ public class PipeBlocker {
     private static boolean isMatchingName(String name, List<Pattern> patterns) {
         for(Pattern p : patterns) {
             if(p.matcher(name).matches()) {
-                System.out.println(p + " " + name);
                 return true;
             }
         }
