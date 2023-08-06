@@ -1,7 +1,8 @@
 package info.mmpa.pipeblocker;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import info.mmpa.pipeblocker.logger.PipeBlockerLog4jLogger;
+import info.mmpa.pipeblocker.logger.PipeBlockerLogger;
+import info.mmpa.pipeblocker.logger.PipeBlockerStdoutLogger;
 
 import java.io.*;
 import java.net.URL;
@@ -10,7 +11,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class PipeBlocker {
-    private static final Logger LOGGER = LogManager.getLogger("PipeBlocker");
+    private static PipeBlockerLogger LOGGER = new PipeBlockerStdoutLogger();
 
     private static final List<Pattern> allowedPatterns = new ArrayList<>();
     private static final List<Pattern> rejectedPatterns = new ArrayList<>();
@@ -39,16 +40,16 @@ public class PipeBlocker {
         // Attempt to load filter from GitHub
         try(InputStream filterStream = new URL(filterURL).openStream()) {
             processFilter(filterStream);
-            LOGGER.info("Successfully loaded online PipeBlocker filter with {} entries.", numEntriesLoaded);
+            LOGGER.info("Successfully loaded online PipeBlocker filter with " + numEntriesLoaded + " entries.");
         } catch(IOException e) {
-            LOGGER.warn("Failed to load online filter, using local version", e);
+            LOGGER.warn("Failed to load online filter, using local version: " + e);
             try(InputStream localFilterStream = PipeBlocker.class.getResourceAsStream("/pipeblocker_filter.txt")) {
                 if(localFilterStream == null)
                     throw new FileNotFoundException("pipeblocker_filter.txt");
                 processFilter(localFilterStream);
-                LOGGER.info("Successfully loaded local PipeBlocker filter with {} entries.", numEntriesLoaded);
+                LOGGER.info("Successfully loaded local PipeBlocker filter with " + numEntriesLoaded +  " entries.");
             } catch(IOException e2) {
-                LOGGER.error("Failed to load local filter, this will mean no deserialization is permitted", e2);
+                LOGGER.error("Failed to load local filter, this will mean no deserialization is permitted: " + e2);
             }
         }
         if (!allowUnsafe && (
@@ -69,6 +70,10 @@ public class PipeBlocker {
                 line = reader.readLine();
             }
         }
+    }
+
+    public static void useLog4j() {
+        LOGGER = new PipeBlockerLog4jLogger();
     }
 
     private static void processLine(String line) {
@@ -97,7 +102,7 @@ public class PipeBlocker {
         }
         if (list != null) {
             String glob = line.substring(1);
-            LOGGER.debug("Adding {} rule for glob '{}'", new Object[] {type, glob});
+            LOGGER.debug("Adding " + type + " rule for glob '" + glob + "'");
             Pattern desiredPattern = Pattern.compile(convertGlobToRegex(glob));
             list.add(desiredPattern);
             numEntriesLoaded++;
@@ -163,7 +168,7 @@ public class PipeBlocker {
         }
 
         if (filterHook != null && REJECTED_CLASSES.add(underlyingClass)) {
-            LOGGER.warn("Blocked class {} from being deserialized as it's not allowed", underlyingClass.getName());
+            LOGGER.warn("Blocked class " + underlyingClass.getName() + " from being deserialized as it's not allowed");
         }
 
         cache.put(clazz, status);

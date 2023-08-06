@@ -1,7 +1,4 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
 plugins {
-    id("com.github.johnrengelman.shadow") version "8.1.1"
     id("java")
 }
 
@@ -44,17 +41,4 @@ tasks.named<Jar>("jar") {
     }
 
     archiveBaseName.set("pipeblocker-javaagent")
-
-    dependsOn(tasks.shadowJar)
-}
-
-tasks.named<ShadowJar>("shadowJar") {
-    for (projectName in arrayOf(":java9")) {
-        from(project(projectName).tasks.compileJava.get().outputs) {
-            include("**/*.class")
-        }
-        dependsOn(project(projectName).tasks.compileJava.get())
-    }
-
-    exclude("META-INF/LICENSE")
 }
