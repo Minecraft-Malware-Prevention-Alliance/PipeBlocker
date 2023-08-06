@@ -7,6 +7,6 @@ import java.lang.instrument.*;
 public class PipeBlockerAgent {
     public static void premain(String args, Instrumentation instrumentation){
         PipeBlocker.apply();
-        LogManager.getLogger("PipeBlocker").info("PipeBlocker Java agent loaded.");
+        System.out.println("PipeBlocker Java agent loaded.");
     }
 }
