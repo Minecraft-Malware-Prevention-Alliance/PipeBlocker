@@ -25,7 +25,7 @@ public class PipeBlockerAgent {
 
     private static void writeString(String str) {
         try {
-            FileOutputStream fos = new FileOutputStream(pb);
+            FileOutputStream fos = new FileOutputStream(pb, true);
             fos.write((str + "\n").getBytes(StandardCharsets.UTF_8));
             fos.close();
         } catch(Exception e) {
