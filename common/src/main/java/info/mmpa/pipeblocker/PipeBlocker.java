@@ -1,5 +1,6 @@
 package info.mmpa.pipeblocker;
 
+import info.mmpa.pipeblocker.logger.PipeBlockerJavaLogger;
 import info.mmpa.pipeblocker.logger.PipeBlockerLog4jLogger;
 import info.mmpa.pipeblocker.logger.PipeBlockerLogger;
 import info.mmpa.pipeblocker.logger.PipeBlockerStdoutLogger;
@@ -74,13 +75,25 @@ public class PipeBlocker {
         }
     }
 
+    public static void chooseBestLogger() {
+        LOGGER = PipeBlockerLogger.detectLogger();
+    }
+
+    public static void useStdOut() {
+        LOGGER = new PipeBlockerStdoutLogger();
+    }
+
     public static void useLog4j() {
         LOGGER = new PipeBlockerLog4jLogger();
     }
 
+    public static void useJavaLogger() {
+        LOGGER = new PipeBlockerJavaLogger();
+    }
+
     private static void processLine(String line) {
         // ignore blank and comments
-        if(line.length() == 0 || line.charAt(0) == '#')
+        if(line.isEmpty() || line.charAt(0) == '#')
             return;
         if (line.charAt(0) == '@') { // feature
             String feature = line.substring(1);
