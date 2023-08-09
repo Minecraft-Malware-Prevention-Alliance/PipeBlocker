@@ -4,5 +4,6 @@ public enum FilterMatchType {
     ALLOW,
     SOFT_ALLOW,
     REJECT,
-    DEFAULT;
+    DEFAULT,
+    DEFAULT_ALLOW;
 }

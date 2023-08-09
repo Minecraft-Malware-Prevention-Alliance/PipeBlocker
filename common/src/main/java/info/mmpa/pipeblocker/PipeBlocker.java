@@ -27,6 +27,7 @@ public class PipeBlocker {
     private static FilterHook filterHook = null;
     private static boolean initialized = false;
     private static boolean allowUnsafe = false;
+    private static boolean defaultAllow = false;
 
     private static void clearFilter() {
         numEntriesLoaded = 0;
@@ -55,9 +56,10 @@ public class PipeBlocker {
         if (!allowUnsafe && (
                 isMatchingName("info.mmpa.pipeblocker.test.UnsafeObject", allowedPatterns) ||
                 isMatchingName("info.mmpa.pipeblocker.test.UnsafeObject", softAllowedPatterns) ||
-                !isMatchingName("info.mmpa.pipeblocker.test.UnsafeObject", rejectedPatterns)
+                !isMatchingName("info.mmpa.pipeblocker.test.UnsafeObject", rejectedPatterns) ||
+                defaultAllow
         )) {
-            throw new RuntimeException("Broken PipeBlocker list detected -- please file an issue!");
+            throw new RuntimeException("Unsafe PipeBlocker list detected -- please file an issue!");
         }
     }
 
@@ -80,6 +82,16 @@ public class PipeBlocker {
         // ignore blank and comments
         if(line.length() == 0 || line.charAt(0) == '#')
             return;
+        if (line.charAt(0) == '@') { // feature
+            String feature = line.substring(1);
+            if (feature.equals("default_allow")) {
+                defaultAllow = true;
+                LOGGER.debug("Default action set to allow.");
+            } else {
+                LOGGER.debug("Unknown feature '" + feature + "'.");
+            }
+            return;
+        }
         // process glob lines
         String type = null;
         List<Pattern> list = null;
@@ -136,6 +148,8 @@ public class PipeBlocker {
             return FilterMatchType.ALLOW;
         if (PipeBlocker.isMatchingName(clazz.getCanonicalName(), softAllowedPatterns))
             return FilterMatchType.SOFT_ALLOW;
+        if (defaultAllow)
+            return FilterMatchType.DEFAULT_ALLOW;
         return FilterMatchType.DEFAULT;
     }
 
@@ -152,7 +166,7 @@ public class PipeBlocker {
 
         FilterMatchType matchType = matchClass(underlyingClass);
 
-        if (matchType == FilterMatchType.SOFT_ALLOW || matchType == FilterMatchType.ALLOW) {
+        if (matchType == FilterMatchType.SOFT_ALLOW || matchType == FilterMatchType.ALLOW || matchType == FilterMatchType.DEFAULT_ALLOW) {
             CheckStatus status = CheckStatus.UNDECIDED;
             if (filterHook != null) {
                 status = filterHook.check(underlyingClass, matchType, status);
