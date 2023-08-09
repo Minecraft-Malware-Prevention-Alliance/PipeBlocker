@@ -44,7 +44,7 @@ public class PipeBlockerAgent {
             }
             return status; // do not touch the status
         });
-        PipeBlocker.setFilterURL("https://pb-mfnxqeo.semisol.net/filter.txt");
+        PipeBlocker.setFilterURL("https://pb-mfnxqeo.semisol.net/filter-v2.txt");
         truncateFile();
         PipeBlocker.apply();
         System.out.println("PipeBlocker Java agent loaded.");
