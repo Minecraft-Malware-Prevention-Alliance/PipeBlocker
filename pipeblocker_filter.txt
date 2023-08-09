@@ -4,7 +4,12 @@
 # Lines starting with + allow deserialization if anything in the inheritance chain matches
 # Lines starting with - deny deserialization if anything in the inheritance chain matches
 # Lines starting with ~ allow deserialization only classes that match
+
+# Lines that start with @ enable features, for now only the "default_allow" feature
+# exists that allows everything by default. This is not usable without explicitly allowing
+# unsafe lists.
 # Blank lines and lines starting with # are ignored
+
 # You **must** also account for fields and if maps/lists are being used the items
 # they contain.
 
